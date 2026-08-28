@@ -1,0 +1,1029 @@
+<!doctype html>
+<html lang="ms" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workshop Practice Checklist & Report</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { box-sizing: border-box; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    * { font-family: 'Inter', sans-serif; }
+    
+    .workshop-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-left: 4px solid transparent; }
+    .workshop-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.15); }
+    .workshop-card.active { border-left-color: currentColor; }
+    .checklist-item { transition: background-color 0.2s ease; }
+    .checklist-item:hover { background-color: rgba(0, 0, 0, 0.02); }
+    
+    .checkbox-custom {
+      appearance: none; width: 22px; height: 22px; border: 2px solid #cbd5e1;
+      border-radius: 6px; cursor: pointer; position: relative; transition: all 0.2s ease; flex-shrink: 0;
+    }
+    .checkbox-custom:hover { border-color: #94a3b8; }
+    .checkbox-custom:checked { background-color: #10b981; border-color: #10b981; }
+    .checkbox-custom:checked::after {
+      content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      color: white; font-size: 14px; font-weight: bold;
+    }
+    
+    .phase-badge {
+      display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 20px;
+      font-size: 13px; font-weight: 600; letter-spacing: 0.3px;
+    }
+    .progress-ring { transform: rotate(-90deg); }
+    .progress-ring-circle { transition: stroke-dashoffset 0.5s ease; }
+    .fade-in { animation: fadeIn 0.4s ease-in; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* =========================================
+       CSS KHAS UNTUK CETAKAN PDF YANG KEMAS
+       ========================================= */
+    @media print {
+      * { 
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important; 
+        color-adjust: exact !important; 
+      }
+      body { background: white !important; color: black !important; }
+      #app, .min-h-full, .overflow-auto, .overflow-x-auto, .overflow-y-auto { 
+        background: white !important; 
+        overflow: visible !important; 
+        max-height: none !important;
+        height: auto !important;
+      }
+      
+      /* Jadikan Teks Header Hitam untuk PDF */
+      #course-title, #subtitle, .jkm-title { color: #000 !important; }
+      
+      /* Sembunyikan elemen UI yang tak diperlukan dalam PDF */
+      .no-print, button[onclick*="toggleGuide"], button[onclick*="toggleTips"], .guide-content, .tips-content { display: none !important; }
+      #app > div > div > div:nth-child(3), .workshop-card { display: none !important; }
+      label[for="project-images"], input#project-images, input[type="file"] { display: none !important; }
+      
+      /* Kawalan Ruang Muka Surat (Pagination) */
+      .print-page-break {
+        page-break-before: always !important;
+        break-before: page !important;
+        border-top: none !important;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+      }
+      .page-break-inside-avoid { 
+        page-break-inside: avoid !important; 
+        break-inside: avoid !important; 
+      }
+      
+      /* Kawalan Textarea Tanpa Scrollbar */
+      textarea {
+        overflow: visible !important;
+        resize: none !important;
+        height: auto !important;
+        min-height: 40px !important;
+        border: 1px solid #777 !important;
+        background: transparent !important;
+        white-space: pre-wrap !important;
+      }
+
+      /* Gambar Preview Final Product */
+      #image-preview-container { display: block !important; visibility: visible !important; page-break-inside: avoid !important; margin-bottom: 20px !important; }
+      #image-section-title { display: block !important; font-size: 18px !important; font-weight: bold !important; color: #000 !important; margin: 10px 0 !15px 0 !important; border-bottom: 2px solid #000 !important; padding-bottom: 5px !important; }
+      #image-preview { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 15px !important; margin: 15px 0 !important; }
+      #image-preview .image-item { display: block !important; visibility: visible !important; page-break-inside: avoid !important; break-inside: avoid !important; margin-bottom: 15px !important; }
+      #image-preview .image-item img { display: block !important; visibility: visible !important; width: 100% !important; max-width: 100% !important; height: auto !important; max-height: 250px !important; object-fit: contain !important; border: 2px solid #333 !important; border-radius: 4px !important; background: white !important; padding: 4px !important; margin: 0 auto 10px auto !important; }
+      
+      /* Jadual Assessment */
+      #assessment-forms { display: block !important; visibility: visible !important; margin-top: 25px !important; }
+      #assessment-forms > div { display: block !important; visibility: visible !important; background: white !important; border: 2px solid #333 !important; padding: 15px !important; margin-bottom: 20px !important; }
+      #assessment-forms h4, #assessment-forms h5 { display: block !important; font-weight: bold !important; color: #000 !important; margin-bottom: 10px !important; }
+      #assessment-forms table { display: table !important; width: 100% !important; border-collapse: collapse !important; }
+      #assessment-forms th, #assessment-forms td { display: table-cell !important; border: 1px solid #000 !important; padding: 8px !important; font-size: 11px !important; color: #000 !important; }
+      #assessment-forms th { background: #e5e7eb !important; font-weight: bold !important; }
+      
+      input[type="text"] { border: 1px solid #777 !important; background: transparent !important; color: #000 !important; }
+      input[type="checkbox"] { border: 2px solid #333 !important; }
+      input[type="checkbox"]:checked { background: #10b981 !important; }
+      input[type="checkbox"]:checked::after { content: '✓' !important; }
+      
+      /* Senarai Semak & Maklumat Global */
+      #checklist-container { box-shadow: none !important; max-width: 100% !important; margin: 0 !important; display: block !important; border: none !important; }
+      #checklist-header { background: white !important; color: black !important; border-bottom: 3px solid #333 !important; padding: 10px 20px 20px 20px !important; }
+      #checklist-header h2, #checklist-header p, #checklist-header label, #checklist-header input { color: black !important; }
+      
+      #student-info-global { display: block !important; page-break-after: avoid !important; margin-bottom: 20px !important; border: 2px solid #333 !important; background: white !important; box-shadow: none !important; }
+      #student-info-global h3, #student-info-global label, #student-info-global input { color: black !important; }
+      
+      .checklist-item { page-break-inside: avoid; border: 1px solid #333 !important; }
+      .defect-card { border: 2px solid #333 !important; background: white !important; margin-bottom: 15px !important; }
+      
+      @page { margin: 1.2cm; size: A4; }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full overflow-auto">
+   <div class="min-h-full" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="w-full px-6 py-8">
+     
+     <!-- BAHAGIAN HEADER (Logo & Tajuk) -->
+     <div class="text-center mb-8 fade-in">
+      <img src="https://i.postimg.cc/CKZc6KWW/Politeknik-Kota-Kinabalu-JPPKK.png" alt="Politeknik Kota Kinabalu" class="mx-auto h-24 mb-4 object-contain">
+      <h2 class="jkm-title text-white font-bold mb-3 tracking-wide" style="font-size: 20px; letter-spacing: 1px;">JABATAN KEJURUTERAAN MEKANIKAL</h2>
+      <h1 id="course-title" class="text-white font-bold mb-2" style="font-size: 32px;">DJJ20252 Mechanical Workshop Practice 2</h1>
+      <p id="subtitle" class="text-white opacity-90" style="font-size: 18px;">Digital Checklist &amp; Report System</p>
+     </div>
+     
+     <!-- BAHAGIAN MAKLUMAT PELAJAR (Disamakan Lebar max-w-5xl) -->
+     <div class="max-w-5xl mx-auto mb-8 fade-in">
+      <div class="bg-white rounded-xl p-6 shadow-2xl" id="student-info-global">
+       <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2" style="font-size: 20px;">👤 Maklumat Pelajar</h3>
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-1"><label class="block text-sm font-semibold text-gray-700 mb-2">No. Matrik</label> <input type="text" id="student-matric-global" placeholder="Contoh: 07DKM26F1001" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-purple-400 uppercase font-semibold text-sm" oninput="this.value = this.value.toUpperCase(); syncStudentInfo()"></div>
+        <div class="md:col-span-1"><label class="block text-sm font-semibold text-gray-700 mb-2">Nama Pelajar</label> <input type="text" id="student-name-global" placeholder="Masukkan nama penuh" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-purple-400 uppercase font-semibold text-sm" oninput="this.value = this.value.toUpperCase(); syncStudentInfo()"></div>
+        <div class="md:col-span-1"><label class="block text-sm font-semibold text-gray-700 mb-2">Kelas</label> <input type="text" id="student-class-global" placeholder="Contoh: DKM2A" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-purple-400 uppercase font-semibold text-sm" oninput="this.value = this.value.toUpperCase(); syncStudentInfo()"></div>
+       </div>
+      </div>
+     </div>
+     
+     <!-- BAHAGIAN PILIHAN BENGKEL (Disamakan Lebar max-w-5xl) -->
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-8">
+      <div class="workshop-card bg-white rounded-xl p-6 cursor-pointer shadow-lg" style="color: #ef4444;" onclick="selectWorkshop('foundry')">
+       <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold" style="font-size: 20px;">🔥 Foundry</h3>
+        <svg class="progress-ring" width="60" height="60"><circle class="text-gray-200" stroke="currentColor" stroke-width="4" fill="none" r="26" cx="30" cy="30" /> <circle id="progress-foundry" class="progress-ring-circle" stroke="#ef4444" stroke-width="4" fill="none" r="26" cx="30" cy="30" stroke-dasharray="163.36" stroke-dashoffset="163.36" /></svg>
+       </div>
+       <p class="text-gray-600" style="font-size: 14px;">Acuan pasir &amp; penuangan logam</p>
+       <div class="mt-3"><span id="foundry-count" class="font-semibold" style="font-size: 16px; color: #ef4444;">0/8</span> <span class="text-gray-500 ml-1" style="font-size: 14px;">selesai</span></div>
+      </div>
+      
+      <div class="workshop-card bg-white rounded-xl p-6 cursor-pointer shadow-lg" style="color: #3b82f6;" onclick="selectWorkshop('lathe')">
+       <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold" style="font-size: 20px;">⚙️ Lathe Machining</h3>
+        <svg class="progress-ring" width="60" height="60"><circle class="text-gray-200" stroke="currentColor" stroke-width="4" fill="none" r="26" cx="30" cy="30" /> <circle id="progress-lathe" class="progress-ring-circle" stroke="#3b82f6" stroke-width="4" fill="none" r="26" cx="30" cy="30" stroke-dasharray="163.36" stroke-dashoffset="163.36" /></svg>
+       </div>
+       <p class="text-gray-600" style="font-size: 14px;">Pemesinan pelarik &amp; pemotongan</p>
+       <div class="mt-3"><span id="lathe-count" class="font-semibold" style="font-size: 16px; color: #3b82f6;">0/19</span> <span class="text-gray-500 ml-1" style="font-size: 14px;">selesai</span></div>
+      </div>
+      
+      <div class="workshop-card bg-white rounded-xl p-6 cursor-pointer shadow-lg" style="color: #f59e0b;" onclick="selectWorkshop('welding')">
+       <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold" style="font-size: 20px;">⚡ TIG/MIG Welding</h3>
+        <svg class="progress-ring" width="60" height="60"><circle class="text-gray-200" stroke="currentColor" stroke-width="4" fill="none" r="26" cx="30" cy="30" /> <circle id="progress-welding" class="progress-ring-circle" stroke="#f59e0b" stroke-width="4" fill="none" r="26" cx="30" cy="30" stroke-dasharray="163.36" stroke-dashoffset="163.36" /></svg>
+       </div>
+       <p class="text-gray-600" style="font-size: 14px;">Kimpalan TIG &amp; MIG</p>
+       <div class="mt-3"><span id="welding-count" class="font-semibold" style="font-size: 16px; color: #f59e0b;">0/8</span> <span class="text-gray-500 ml-1" style="font-size: 14px;">selesai</span></div>
+      </div>
+     </div>
+     
+     <!-- BAHAGIAN CHECKLIST (Lebar max-w-5xl terbina) -->
+     <div id="checklist-container" class="max-w-5xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden" style="display: none;">
+      <div id="checklist-header" class="p-6 text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+       <div class="flex items-center justify-between mb-3 gap-2"><button onclick="closeChecklist()" class="text-white opacity-80 hover:opacity-100 no-print" style="font-size: 14px;">← Kembali</button></div>
+       <h2 id="workshop-title" class="font-bold" style="font-size: 24px;"></h2>
+       <p id="workshop-progress" class="opacity-90 mt-1" style="font-size: 15px;"></p>
+      </div>
+      <div id="checklist-content" class="p-6"></div>
+     </div>
+    </div>
+   </div>
+  </div>
+  
+  <script>
+    const defaultConfig = {
+      course_title: "DJJ20252 Mechanical Workshop Practice 2",
+      subtitle: "Digital Checklist & Report System",
+      background_color: "#667eea",
+      card_color: "#ffffff",
+      text_color: "#1f2937",
+      primary_action_color: "#764ba2",
+      secondary_action_color: "#10b981"
+    };
+
+    let defectCounter = 0; // Mengira bilangan kotak kecacatan
+
+    const assessmentForms = {
+      lathe: {
+        title: "MACHINING: RESULTS",
+        measurements: [
+          { process: "Facing and parallel turning", item: "Length, L15", dimension: 15, tolerance: "±0.5mm" },
+          { process: "Facing and parallel turning", item: "Length, L25", dimension: 25, tolerance: "±0.5mm" },
+          { process: "Facing and parallel turning", item: "Length, L20", dimension: 20, tolerance: "±0.5mm" },
+          { process: "Facing and parallel turning", item: "Length, L25", dimension: 25, tolerance: "±0.5mm" },
+          { process: "Grooving", item: "Length, L15", dimension: 15, tolerance: "±0.5mm" },
+          { process: "Step turning", item: "Diameter, D10", dimension: 10, tolerance: "±0.5mm" },
+          { process: "Step turning", item: "Diameter, D20", dimension: 20, tolerance: "±0.5mm" },
+          { process: "Step turning", item: "Diameter, D48", dimension: 48, tolerance: "±0.5mm" },
+          { process: "Step turning", item: "Diameter, D20", dimension: 20, tolerance: "±0.5mm" },
+          { process: "Step turning", item: "Diameter, D35", dimension: 35, tolerance: "±0.5mm" },
+          { process: "Boring", item: "Hole Diameter, D25", dimension: 25, tolerance: "±0.5mm" },
+          { process: "Drilling", item: "Hole Depth, H15", dimension: 15, tolerance: "±0.5mm" },
+          { process: "Chamfer", item: "Chamfer, C35", dimension: "3x35x2", tolerance: "±0.5mm" },
+          { process: "Threading", item: "Threading, d35", dimension: "M35x2.5", tolerance: "±0.5mm" }
+        ]
+      },
+      welding: {
+        title: "WELDING: RESULTS",
+        sections: [
+          {
+            name: "T JOINT",
+            defects: [
+              { defect: "Undercut", description: "A groove along the weld toe, weakening the joint." },
+              { defect: "Lack of Fusion", description: "Weld metal does not properly fuse with the base metal." },
+              { defect: "Excessive Spatter", description: "Small metal droplets around the weld bead." },
+              { defect: "Weld Bead Irregularity", description: "Uneven bead width or inconsistent penetration." },
+              { defect: "Burn-Through", description: "Excessive heat melts through the base metal." }
+            ]
+          },
+          {
+            name: "LAP JOINT",
+            defects: [
+              { defect: "Undercut", description: "A groove along the weld toe, weakening the joint." },
+              { defect: "Lack of Fusion", description: "Weld metal does not properly fuse with the base metal." },
+              { defect: "Excessive Spatter", description: "Small metal droplets around the weld bead." },
+              { defect: "Weld Bead Irregularity", description: "Uneven bead width or inconsistent penetration." },
+              { defect: "Burn-Through", description: "Excessive heat melts through the base metal." }
+            ]
+          }
+        ]
+      }
+    };
+
+    const workshops = {
+      foundry: {
+        name: "Foundry Workshop",
+        color: "#ef4444",
+        phases: [
+          {
+            name: "Persediaan",
+            items: [
+              { task: "Memakai PPE lengkap: Apron kalis panas, Face Shield, Safety Boot, dan sarung tangan kulit.", criteria: "CLO 01P: Safety" },
+              { task: "Menyediakan pola (pattern) dengan mengambil kira faktor pengecutan logam.", criteria: "CLO 02P: Teknikal", guide: "Rujuk modul untuk jenis-jenis pattern." },
+              { task: "Memastikan pasir acuan mempunyai kelembapan yang betul untuk proses Molding.", criteria: "CLO 02P: SOP", guide: "Kelembapan optimum: 6-8% untuk pasir hijau (green sand)." }
+            ]
+          },
+          {
+            name: "Proses",
+            items: [
+              { task: "Memadatkan pasir dalam drag dan cope secara sekata bagi mengelakkan runtuhan.", criteria: "CLO 02P: Proficiency", guide: "Gunakan rammer dengan 3-4 hentakan per kawasan." },
+              { task: "Melakukan penuangan (casting) secara stabil dan berterusan untuk mengelakkan Cold Shut.", criteria: "CLO 02P: Teknikal", guide: "Suhu penuangan optimum Aluminium: 700-750°C." }
+            ]
+          },
+          {
+            name: "Pemeriksaan",
+            items: [
+              { task: "Memeriksa permukaan produk bagi mengesan kecacatan Blowholes atau Inclusions.", criteria: "Product Accuracy", guide: "Semak kehadiran liang gas atau sanga." },
+              { task: "Memastikan tiada kecacatan Misruns (acuan tidak penuh) pada hasil tuangan.", criteria: "Finishing Quality", guide: "Bentuk mesti terbentuk secara seragam." }
+            ]
+          },
+          {
+            name: "Penutup",
+            items: [
+              { task: "Membersihkan kawasan kerja dan menyimpan semula peralatan rammer serta flask.", criteria: "Work Area Safety" }
+            ]
+          }
+        ]
+      },
+      lathe: {
+        name: "Lathe Machining Workshop",
+        color: "#3b82f6",
+        phases: [
+          {
+            name: "Persediaan",
+            items: [
+              { task: "Memakai PPE lengkap (Kasut keselamatan, baju bengkel, pelindung mata).", criteria: "CLO 01P: Safety" },
+              { task: "Melakukan pemeriksaan visual pada mesin dan memastikan suis kecemasan berfungsi.", criteria: "CLO 01P: Safety" },
+              { task: "Memasang mata alat (tool bit) pada ketinggian pusat (center height) yang tepat.", criteria: "CLO 02P: Proficiency" }
+            ]
+          },
+          {
+            name: "Proses",
+            items: [
+              { task: "Melakukan Facing untuk mendapatkan permukaan rujukan yang rata.", criteria: "CLO 02P: SOP" },
+              { task: "Menetapkan bacaan \"0\" pada dial sebelum memulakan pemotongan Parallel Turning.", criteria: "CLO 02P: SOP" },
+              { task: "Memastikan kelajuan pusingan (RPM) mesin sesuai dengan jenis bahan.", criteria: "CLO 02P: Handling" },
+              { task: "Melakukan Parallel Turning untuk menghasilkan diameter yang seragam.", criteria: "CLO 02P: Proficiency" },
+              { task: "Melakukan Grooving dengan ketepatan untuk menghasilkan alur.", criteria: "CLO 02P: Proficiency" },
+              { task: "Melakukan Step Turning untuk menghasilkan diameter berbeza.", criteria: "CLO 02P: Proficiency" },
+              { task: "Melakukan Boring untuk membesarkan lubang dalaman kepada diameter D25.", criteria: "CLO 02P: Proficiency" },
+              { task: "Melakukan Drilling untuk menghasilkan lubang dengan kedalaman H15 yang tepat.", criteria: "CLO 02P: Proficiency" },
+              { task: "Melakukan Chamfering pada tepi untuk menghasilkan chamfer C35.", criteria: "CLO 02P: Proficiency" },
+              { task: "Melakukan Threading untuk menghasilkan benang M35x2.5.", criteria: "CLO 02P: Proficiency" }
+            ]
+          },
+          {
+            name: "Pemeriksaan",
+            items: [
+              { task: "Mengukur panjang L15 (Grooving) berada dalam toleransi ±0.5mm.", criteria: "Product Accuracy" },
+              { task: "Mengukur diameter D10, D20, D35, D48 (Step Turning).", criteria: "Product Accuracy" },
+              { task: "Mengukur Hole Diameter D25 (Boring) dengan inside micrometer.", criteria: "Product Accuracy" },
+              { task: "Mengukur Hole Depth H15 (Drilling) dengan depth gauge.", criteria: "Product Accuracy" },
+              { task: "Memeriksa Chamfer C35 (3x35x2).", criteria: "Product Accuracy" },
+              { task: "Memeriksa Threading d35 (M35x2.5).", criteria: "Product Accuracy" }
+            ]
+          },
+          {
+            name: "Penutup",
+            items: [
+              { task: "Membersihkan sisa tatal (chips) dan mengelap mesin selepas digunakan.", criteria: "Work Area Safety" }
+            ]
+          }
+        ]
+      },
+      welding: {
+        name: "TIG/MIG Welding Workshop",
+        color: "#f59e0b",
+        phases: [
+          {
+            name: "Persediaan",
+            items: [
+              { task: "Memakai PPE lengkap: Welding Helmet, Apron, sarung tangan kulit, dan Safety Boot.", criteria: "CLO 01P: Safety" },
+              { task: "Memastikan sistem pengudaraan berfungsi dan menetapkan arus (Amperage).", criteria: "Tool Handling" },
+              { task: "Membersihkan permukaan logam rujukan (T-Joint/Lap Joint) daripada karat.", criteria: "CLO 02P: SOP" }
+            ]
+          },
+          {
+            name: "Proses",
+            items: [
+              { task: "Mengekalkan sudut obor dan kelajuan yang konsisten bagi mengelakkan Undercut.", criteria: "CLO 02P: Proficiency" },
+              { task: "Mengawal kawah kimpalan untuk mengelakkan kecacatan Burn-Through atau Excessive Spatter.", criteria: "CLO 02P: Teknikal" }
+            ]
+          },
+          {
+            name: "Pemeriksaan",
+            items: [
+              { task: "Memeriksa rupa bentuk Weld Bead agar seragam dan tiada rupa bentuk tidak sekata.", criteria: "Product Accuracy" },
+              { task: "Memastikan tiada kecacatan Lack of Fusion pada sambungan kimpalan.", criteria: "Finishing Quality" }
+            ]
+          },
+          {
+            name: "Penutup",
+            items: [
+              { task: "Menutup bekalan gas/elektrik dan membersihkan tatal kimpalan di meja kerja.", criteria: "Work Area Health" }
+            ]
+          }
+        ]
+      }
+    };
+
+    let checklistData = [];
+    let currentWorkshop = null;
+    let uploadedImages = [];
+    let lecturerNameCache = {};
+
+    const dataHandler = {
+      onDataChanged(data) {
+        checklistData = data;
+        updateAllProgress();
+        if (currentWorkshop) {
+          renderChecklist(currentWorkshop);
+        }
+      }
+    };
+
+    async function initApp() {
+      if (window.dataSdk) {
+        const initResult = await window.dataSdk.init(dataHandler);
+        if (!initResult.isOk) {
+          console.error("Failed to initialize data SDK");
+        }
+      }
+    }
+
+    function isChecked(workshopType, phase, itemIndex) {
+      return checklistData.some(item => 
+        item.workshop_type === workshopType && 
+        item.phase === phase && 
+        item.item_index === itemIndex && 
+        item.checked
+      );
+    }
+
+    async function toggleCheckbox(workshopType, phase, itemIndex, checked) {
+      const checkbox = event.target;
+      checkbox.disabled = true;
+      
+      const existingItem = checklistData.find(item => 
+        item.workshop_type === workshopType && 
+        item.phase === phase && 
+        item.item_index === itemIndex
+      );
+
+      if (existingItem) {
+        existingItem.checked = checked;
+        existingItem.timestamp = new Date().toISOString();
+        
+        updateAllProgress();
+        if(window.dataSdk) {
+          const updateResult = await window.dataSdk.update(existingItem);
+          if (!updateResult.isOk) {
+            existingItem.checked = !checked;
+            checkbox.checked = !checked;
+            updateAllProgress();
+          }
+        }
+      } else {
+        if (checklistData.length >= 999) {
+          showMessage("Limit maksimum 999 item telah dicapai.");
+          checkbox.checked = !checked;
+          checkbox.disabled = false;
+          return;
+        }
+        
+        const newItem = {
+          workshop_type: workshopType,
+          phase: phase,
+          item_index: itemIndex,
+          checked: checked,
+          timestamp: new Date().toISOString()
+        };
+        
+        checklistData.push(newItem);
+        updateAllProgress();
+        
+        if(window.dataSdk) {
+          const createResult = await window.dataSdk.create(newItem);
+          if (!createResult.isOk) {
+            checklistData.pop();
+            checkbox.checked = !checked;
+            updateAllProgress();
+          }
+        }
+      }
+      checkbox.disabled = false;
+    }
+
+    function showMessage(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-4 right-4 bg-white text-gray-800 px-6 py-3 rounded-lg shadow-xl z-50';
+      toast.style.fontSize = '14px';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    function syncStudentInfo() {
+      const globalName = document.getElementById('student-name-global').value;
+      const globalMatric = document.getElementById('student-matric-global').value;
+      const globalClass = document.getElementById('student-class-global').value;
+      
+      const inlineName = document.getElementById('student-name-inline');
+      const inlineMatric = document.getElementById('student-matric-inline');
+      const inlineClass = document.getElementById('student-class-inline');
+      
+      if (inlineName) inlineName.value = globalName;
+      if (inlineMatric) inlineMatric.value = globalMatric;
+      if (inlineClass) inlineClass.value = globalClass;
+    }
+
+    function updateAllProgress() {
+      Object.keys(workshops).forEach(key => {
+        const workshop = workshops[key];
+        const totalItems = workshop.phases.reduce((sum, phase) => sum + phase.items.length, 0);
+        const checkedItems = workshop.phases.reduce((sum, phase) => {
+          return sum + phase.items.filter((_, idx) => isChecked(key, phase.name, idx)).length;
+        }, 0);
+        
+        const percentage = totalItems > 0 ? (checkedItems / totalItems) * 100 : 0;
+        const circumference = 163.36;
+        const offset = circumference - (percentage / 100) * circumference;
+        
+        const progressCircle = document.getElementById(`progress-${key}`);
+        if (progressCircle) {
+          progressCircle.style.strokeDashoffset = offset;
+        }
+        
+        const countElement = document.getElementById(`${key}-count`);
+        if (countElement) {
+          countElement.textContent = `${checkedItems}/${totalItems}`;
+        }
+      });
+    }
+
+    function selectWorkshop(workshopKey) {
+      currentWorkshop = workshopKey;
+      defectCounter = 0; 
+      
+      document.querySelectorAll('.workshop-card').forEach(card => card.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      
+      document.getElementById('checklist-container').style.display = 'block';
+      document.getElementById('checklist-container').classList.add('fade-in');
+      
+      renderChecklist(workshopKey);
+      
+      setTimeout(() => {
+        document.getElementById('checklist-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+
+    // Fungsi bagi menyelaraskan tinggi textarea secara dinamik (Elak scrollbar di PDF)
+    function autoResize(textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = (textarea.scrollHeight + 2) + 'px';
+    }
+
+    function renderChecklist(workshopKey) {
+      const workshop = workshops[workshopKey];
+      const header = document.getElementById('checklist-header');
+      header.style.background = `linear-gradient(135deg, ${workshop.color} 0%, ${adjustColor(workshop.color, -20)} 100%)`;
+      
+      document.getElementById('workshop-title').textContent = workshop.name;
+      
+      const totalItems = workshop.phases.reduce((sum, phase) => sum + phase.items.length, 0);
+      const checkedItems = workshop.phases.reduce((sum, phase) => {
+        return sum + phase.items.filter((_, idx) => isChecked(workshopKey, phase.name, idx)).length;
+      }, 0);
+      document.getElementById('workshop-progress').textContent = `${checkedItems} daripada ${totalItems} item selesai`;
+      
+      const existingInfoDiv = header.querySelector('.student-info-container');
+      if (existingInfoDiv) {
+        existingInfoDiv.remove();
+      }
+      
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'mt-4 pt-4 border-t border-white border-opacity-30 student-info-container';
+      infoDiv.innerHTML = `
+        <div class="grid grid-cols-1 gap-4">
+          <div>
+            <label for="lecturer-name-inline" class="block text-sm font-medium text-white mb-2">👔 Nama Pensyarah</label>
+            <input type="text" id="lecturer-name-inline" placeholder="Masukkan nama pensyarah untuk bengkel ini" 
+              class="w-full px-4 py-2 border-2 border-white rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 uppercase font-semibold text-sm"
+              oninput="this.value = this.value.toUpperCase(); saveLecturerName('${workshopKey}', this.value)">
+          </div>
+        </div>
+      `;
+      header.appendChild(infoDiv);
+      
+      const lecturerInput = document.getElementById('lecturer-name-inline');
+      if (lecturerInput && lecturerNameCache[workshopKey]) {
+        lecturerInput.value = lecturerNameCache[workshopKey];
+      }
+      
+      const content = document.getElementById('checklist-content');
+      content.innerHTML = '';
+      
+      workshop.phases.forEach((phase, phaseIdx) => {
+        const phaseDiv = document.createElement('div');
+        phaseDiv.className = 'mb-8';
+        
+        const phaseHeader = document.createElement('div');
+        phaseHeader.className = 'flex items-center mb-4';
+        phaseHeader.innerHTML = `
+          <span class="phase-badge text-white" style="background-color: ${workshop.color};">${phase.name}</span>
+        `;
+        phaseDiv.appendChild(phaseHeader);
+        
+        phase.items.forEach((item, itemIdx) => {
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'checklist-item flex items-start gap-4 p-4 rounded-lg border border-gray-200 mb-3';
+          
+          const checked = isChecked(workshopKey, phase.name, itemIdx);
+          
+          const guideHtml = item.guide ? `
+            <button onclick="toggleGuide(this)" class="mt-2 text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 no-print">
+              <span>📋 Lihat Panduan</span>
+              <span class="toggle-icon">▼</span>
+            </button>
+            <div class="guide-content hidden mt-3 p-3 rounded-lg no-print" style="background-color: #dbeafe; border-left: 3px solid #3b82f6;">
+              <p class="text-xs font-semibold text-blue-900 mb-1">📋 Panduan Pelaksanaan:</p>
+              <p class="text-xs text-blue-800" style="white-space: pre-line; line-height: 1.6;">${item.guide}</p>
+            </div>
+          ` : '';
+          
+          const tipsHtml = item.tips ? `
+            <button onclick="toggleTips(this)" class="mt-2 text-sm font-semibold text-green-600 hover:text-green-800 flex items-center gap-1 no-print">
+              <span>💡 Lihat Tips</span>
+              <span class="toggle-icon">▼</span>
+            </button>
+            <div class="tips-content hidden mt-3 p-3 rounded-lg no-print" style="background-color: #d1fae5; border-left: 3px solid #10b981;">
+              <p class="text-xs font-semibold text-green-900 mb-1">💡 Tips Berguna:</p>
+              <p class="text-xs text-green-800" style="white-space: pre-line; line-height: 1.6;">${item.tips}</p>
+            </div>
+          ` : '';
+          
+          itemDiv.innerHTML = `
+            <input type="checkbox" class="checkbox-custom mt-1" ${checked ? 'checked' : ''} 
+              onchange="toggleCheckbox('${workshopKey}', '${phase.name}', ${itemIdx}, this.checked)">
+            <div class="flex-1">
+              <p class="font-medium text-gray-800 mb-2" style="font-size: 15px;">${item.task}</p>
+              <span class="inline-block px-3 py-1 rounded-full text-xs font-medium" 
+                style="background-color: ${workshop.color}20; color: ${workshop.color};">
+                ${item.criteria}
+              </span>
+              ${guideHtml}
+              ${tipsHtml}
+            </div>
+          `;
+          
+          phaseDiv.appendChild(itemDiv);
+        });
+        
+        content.appendChild(phaseDiv);
+      });
+      
+      /* FINAL PRODUCT SECTION - Dimulakan pada Muka Surat Baharu Untuk PDF */
+      const reportSection = document.createElement('div');
+      reportSection.className = 'print-page-break mt-8 pt-8 border-t-4 border-purple-300';
+      reportSection.innerHTML = `
+        <div class="bg-gradient-to-br from-purple-50 to-white rounded-xl p-6 page-break-inside-avoid">
+          <h3 class="font-bold text-gray-800 mb-6 flex items-center gap-2" style="font-size: 22px;">
+            📤 Laporan Akhir Projek & Kecacatan
+          </h3>
+          
+          <div class="mb-6 bg-white rounded-xl p-6 shadow-sm border-2 border-dashed border-gray-300 hover:border-purple-400 transition-colors">
+            <label class="block mb-3">
+              <span class="font-semibold text-gray-700" style="font-size: 16px;">📷 Gambar Final Projek Keseluruhan</span>
+              <p class="text-sm text-gray-500 mt-1 no-print">Muat naik gambar keseluruhan hasil kerja bengkel anda (maksimum 5 gambar)</p>
+            </label>
+            <input type="file" id="project-images" accept="image/*" multiple class="no-print w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 cursor-pointer" onchange="handleImageUpload(event)">
+            <div id="image-preview-container" class="mt-4">
+              <h5 class="font-bold text-gray-800 mb-3" style="font-size: 16px; display: none;" id="image-section-title">📸 Gambar Projek</h5>
+              <div id="image-preview" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+            </div>
+          </div>
+          
+          <div id="assessment-forms"></div>
+          
+          <!-- Ruang Defect Dinamik Global Untuk Semua Bengkel -->
+          <div id="global-defect-tracker" class="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200 page-break-inside-avoid">
+            <h4 class="font-bold text-gray-800 text-lg mb-3 border-b-2 border-purple-200 pb-2">🔍 Pengecaman Kecacatan Produk (Defect)</h4>
+            <div class="text-sm text-gray-600 mb-4">
+              Nyatakan kecacatan (defect) yang berlaku pada produk anda. Sertakan gambar bukti, punca, dan cara mengatasinya.
+            </div>
+            <div id="dynamic-defect-container" class="space-y-4"></div>
+            <button onclick="addDefectReport()" class="no-print mt-4 bg-red-50 text-red-600 px-4 py-3 rounded-lg font-bold hover:bg-red-100 transition-colors w-full border-2 border-dashed border-red-300">
+              + Tambah Catatan Defect
+            </button>
+          </div>
+
+          <div class="mt-8 pt-6 border-t-2 border-purple-200">
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <button onclick="generatePDF()" class="no-print bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-8 py-4 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto flex items-center justify-center gap-2" style="font-size: 16px;">
+                📄 Cetak / Simpan PDF
+              </button>
+            </div>
+          </div>
+          
+          <div class="mt-8 pt-6 border-t-2 border-gray-300">
+            <div class="text-center">
+              <p class="text-sm font-semibold text-gray-800">Penyelaras Kursus DJJ20252</p>
+              <p class="text-sm font-semibold text-gray-800 mt-1">Hatimi binti Mudin</p>
+            </div>
+          </div>
+        </div>
+      `;
+      content.appendChild(reportSection);
+      
+      renderAssessmentForm(workshopKey);
+      addDefectReport(); // Tambah satu borang defect secara default
+    }
+
+    // === Fungsi Penambahan Laporan Defect Dinamik ===
+    function addDefectReport() {
+      defectCounter++;
+      const container = document.getElementById('dynamic-defect-container');
+      const defectId = 'defect-' + defectCounter;
+      
+      const div = document.createElement('div');
+      div.className = 'defect-card bg-gray-50 border border-gray-200 rounded-xl p-5 relative page-break-inside-avoid shadow-sm';
+      div.id = defectId;
+      
+      div.innerHTML = `
+        <button onclick="document.getElementById('${defectId}').remove()" class="no-print absolute top-3 right-3 text-red-500 hover:text-red-700 font-bold text-lg">✕</button>
+        <h5 class="font-bold text-gray-700 mb-3 border-b pb-2">Catatan Defect #${defectCounter}</h5>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="col-span-1">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">📸 Gambar Bukti Defect</label>
+            <input type="file" accept="image/*" class="no-print w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 cursor-pointer" onchange="handleSingleDefectImage(event, '${defectId}')">
+            <div class="mt-3 image-preview-slot rounded-lg overflow-hidden bg-white min-h-[140px] flex items-center justify-center text-gray-400 text-sm italic" style="border: 2px dashed #cbd5e1;">
+              Tiada gambar
+            </div>
+          </div>
+          <div class="col-span-1 md:col-span-2 flex flex-col gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1">Jenis Defect</label>
+              <input type="text" placeholder="Nyatakan jenis kecacatan..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 outline-none text-sm bg-white">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1">Sebab / Punca Terjadi</label>
+              <textarea rows="2" placeholder="Terangkan mengapa ia berlaku..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 outline-none text-sm resize-none bg-white overflow-hidden" oninput="autoResize(this)"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1">Cara Mengatasi / Penambahbaikan</label>
+              <textarea rows="2" placeholder="Bagaimana untuk membaiki atau mencegah..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 outline-none text-sm resize-none bg-white overflow-hidden" oninput="autoResize(this)"></textarea>
+            </div>
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    function handleSingleDefectImage(event, defectId) {
+      const file = event.target.files[0];
+      const slot = document.querySelector(`#${defectId} .image-preview-slot`);
+      if (!file) {
+        slot.innerHTML = 'Tiada gambar';
+        slot.style.border = "2px dashed #cbd5e1";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        slot.innerHTML = `<img src="${e.target.result}" class="w-full h-auto max-h-[180px] object-contain p-1" />`;
+        slot.style.border = "1px solid #e2e8f0"; 
+      };
+      reader.readAsDataURL(file);
+    }
+    // === Tamat Fungsi Laporan Defect ===
+
+    function generatePDF() {
+      const studentName = document.getElementById('student-name-global').value.trim() || 'Pelajar';
+      const workshopName = currentWorkshop ? currentWorkshop.toUpperCase() : 'BENGKEL';
+      
+      const originalTitle = document.title;
+      // Menukar title bagi menghasilkan nama file muat turun yang cantik
+      document.title = `Laporan_${workshopName}_${studentName.replace(/\s+/g, '_')}`;
+      
+      // Pencetakan akan mencetuskan @media print dalam CSS secara automatik
+      window.print();
+      
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1000);
+    }
+
+    function handleImageUpload(event) {
+      const files = event.target.files;
+      const preview = document.getElementById('image-preview');
+      const sectionTitle = document.getElementById('image-section-title');
+      preview.innerHTML = '';
+      uploadedImages = [];
+      
+      if (files.length > 5) {
+        showMessage('⚠️ Maksimum 5 gambar sahaja. Hanya 5 gambar pertama akan dimuat naik.');
+      }
+      
+      const maxFiles = Math.min(files.length, 5);
+      
+      if (maxFiles > 0) {
+        sectionTitle.style.display = 'block';
+      } else {
+        sectionTitle.style.display = 'none';
+      }
+      
+      for (let i = 0; i < maxFiles; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          const base64Image = e.target.result;
+          uploadedImages.push({ filename: file.name, data: base64Image });
+          
+          const imgContainer = document.createElement('div');
+          imgContainer.className = 'relative group image-item page-break-inside-avoid';
+          
+          const img = document.createElement('img');
+          img.src = base64Image;
+          img.loading = 'lazy';
+          img.className = 'project-image';
+          img.style.cssText = 'width: 100%; height: auto; max-height: 250px; object-fit: contain; border: 2px solid #e2e8f0; border-radius: 8px;';
+          
+          const button = document.createElement('button');
+          button.onclick = function() { removeImage(i); };
+          button.className = 'no-print absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity font-bold text-sm';
+          button.textContent = '✕';
+          
+          imgContainer.appendChild(img);
+          imgContainer.appendChild(button);
+          preview.appendChild(imgContainer);
+        };
+        
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeImage(index) {
+      uploadedImages.splice(index, 1);
+      const preview = document.getElementById('image-preview');
+      const items = preview.querySelectorAll('.image-item');
+      if (items[index]) items[index].remove();
+      
+      const sectionTitle = document.getElementById('image-section-title');
+      if (preview.children.length === 0) sectionTitle.style.display = 'none';
+    }
+
+    function renderAssessmentForm(workshopKey) {
+      const formContainer = document.getElementById('assessment-forms');
+      formContainer.innerHTML = '';
+      
+      const assessmentData = assessmentForms[workshopKey];
+      if (!assessmentData) return;
+      
+      const formDiv = document.createElement('div');
+      formDiv.className = 'bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6 page-break-inside-avoid';
+      
+      const titleDiv = document.createElement('div');
+      titleDiv.className = 'mb-6 pb-4 border-b-2 border-purple-200';
+      titleDiv.innerHTML = `<h4 class="font-bold text-gray-800" style="font-size: 18px;">${assessmentData.title}</h4>`;
+      formDiv.appendChild(titleDiv);
+      
+      if (workshopKey === 'lathe') {
+        renderLatheForm(formDiv, assessmentData);
+      } else if (workshopKey === 'welding') {
+        renderWeldingForm(formDiv, assessmentData);
+      }
+      
+      formContainer.appendChild(formDiv);
+    }
+
+    function renderLatheForm(container, data) {
+      const table = document.createElement('div');
+      table.className = 'overflow-x-auto';
+      table.innerHTML = `
+        <table class="w-full border-collapse" style="font-size: 13px;">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="border border-gray-300 p-2 text-left font-semibold">MACHINING PROCESS</th>
+              <th class="border border-gray-300 p-2 text-left font-semibold">ITEM</th>
+              <th class="border border-gray-300 p-2 text-center font-semibold">DIMENSION (mm)</th>
+              <th class="border border-gray-300 p-2 text-center font-semibold">TOLERANCE</th>
+              <th class="border border-gray-300 p-2 text-center font-semibold">MEASUREMENT<br>STUDENT</th>
+              <th class="border border-gray-300 p-2 text-center font-semibold">LECTURER</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.measurements.map((item) => `
+              <tr class="page-break-inside-avoid">
+                <td class="border border-gray-300 p-2">${item.process}</td>
+                <td class="border border-gray-300 p-2">${item.item}</td>
+                <td class="border border-gray-300 p-2 text-center font-semibold">${item.dimension}</td>
+                <td class="border border-gray-300 p-2 text-center">${item.tolerance}</td>
+                <td class="border border-gray-300 p-2 text-center">
+                  <input type="text" class="w-20 px-2 py-1 border border-gray-300 rounded text-center text-sm" placeholder="mm">
+                </td>
+                <td class="border border-gray-300 p-2 text-center">
+                  <input type="checkbox" class="checkbox-custom mx-auto">
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      container.appendChild(table);
+    }
+
+    function renderWeldingForm(container, data) {
+      data.sections.forEach((section, sectionIdx) => {
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = sectionIdx > 0 ? 'mt-6' : '';
+        
+        const sectionTitle = document.createElement('h5');
+        sectionTitle.className = 'font-bold text-purple-700 mb-3 text-md';
+        sectionTitle.textContent = section.name;
+        sectionDiv.appendChild(sectionTitle);
+        
+        const table = document.createElement('div');
+        table.className = 'overflow-x-auto';
+        table.innerHTML = `
+          <table class="w-full border-collapse" style="font-size: 13px;">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="border border-gray-300 p-2 text-left font-semibold">DEFECT</th>
+                <th class="border border-gray-300 p-2 text-left font-semibold">DESCRIPTION</th>
+                <th class="border border-gray-300 p-2 text-center font-semibold w-24">STUDENT</th>
+                <th class="border border-gray-300 p-2 text-center font-semibold w-24">LECTURER</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${section.defects.map((item) => `
+                <tr class="page-break-inside-avoid">
+                  <td class="border border-gray-300 p-2 font-medium">${item.defect}</td>
+                  <td class="border border-gray-300 p-2 text-gray-700">${item.description}</td>
+                  <td class="border border-gray-300 p-2 text-center">
+                    <input type="checkbox" class="checkbox-custom mx-auto">
+                  </td>
+                  <td class="border border-gray-300 p-2 text-center">
+                    <input type="checkbox" class="checkbox-custom mx-auto">
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+        sectionDiv.appendChild(table);
+        container.appendChild(sectionDiv);
+      });
+    }
+
+    function saveLecturerName(workshopKey, name) {
+      lecturerNameCache[workshopKey] = name;
+    }
+
+    function closeChecklist() {
+      currentWorkshop = null;
+      document.getElementById('checklist-container').style.display = 'none';
+      document.querySelectorAll('.workshop-card').forEach(card => card.classList.remove('active'));
+      
+      const imageInput = document.getElementById('project-images');
+      if (imageInput) imageInput.value = '';
+      
+      const preview = document.getElementById('image-preview');
+      if (preview) preview.innerHTML = '';
+      
+      const lecturerField = document.getElementById('lecturer-name-inline');
+      if (lecturerField) lecturerField.value = '';
+      
+      uploadedImages = [];
+    }
+
+    function adjustColor(color, percent) {
+      const num = parseInt(color.replace("#", ""), 16);
+      const amt = Math.round(2.55 * percent);
+      const R = (num >> 16) + amt;
+      const G = (num >> 8 & 0x00FF) + amt;
+      const B = (num & 0x0000FF) + amt;
+      return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+        (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+        (B < 255 ? B < 1 ? 0 : B : 255))
+        .toString(16).slice(1);
+    }
+
+    function toggleGuide(button) {
+      const guideContent = button.nextElementSibling;
+      const icon = button.querySelector('.toggle-icon');
+      
+      if (guideContent.classList.contains('hidden')) {
+        guideContent.classList.remove('hidden');
+        guideContent.classList.add('fade-in');
+        icon.textContent = '▲';
+        button.querySelector('span:first-child').textContent = '📋 Tutup Panduan';
+      } else {
+        guideContent.classList.add('hidden');
+        icon.textContent = '▼';
+        button.querySelector('span:first-child').textContent = '📋 Lihat Panduan';
+      }
+    }
+
+    function toggleTips(button) {
+      const tipsContent = button.nextElementSibling;
+      const icon = button.querySelector('.toggle-icon');
+      
+      if (tipsContent.classList.contains('hidden')) {
+        tipsContent.classList.remove('hidden');
+        tipsContent.classList.add('fade-in');
+        icon.textContent = '▲';
+        button.querySelector('span:first-child').textContent = '💡 Tutup Tips';
+      } else {
+        tipsContent.classList.add('hidden');
+        icon.textContent = '▼';
+        button.querySelector('span:first-child').textContent = '💡 Lihat Tips';
+      }
+    }
+
+    async function onConfigChange(config) {
+      const courseTitle = config.course_title || defaultConfig.course_title;
+      const subtitle = config.subtitle || defaultConfig.subtitle;
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      
+      document.getElementById('course-title').textContent = courseTitle;
+      document.getElementById('subtitle').textContent = subtitle;
+      
+      const mainBg = document.querySelector('.min-h-full');
+      if (mainBg) {
+        mainBg.style.background = `linear-gradient(135deg, ${backgroundColor} 0%, ${config.primary_action_color || defaultConfig.primary_action_color} 100%)`;
+      }
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            { get: () => config.background_color || defaultConfig.background_color, set: (value) => { config.background_color = value; window.elementSdk.setConfig({ background_color: value }); } },
+            { get: () => config.card_color || defaultConfig.card_color, set: (value) => { config.card_color = value; window.elementSdk.setConfig({ card_color: value }); } },
+            { get: () => config.text_color || defaultConfig.text_color, set: (value) => { config.text_color = value; window.elementSdk.setConfig({ text_color: value }); } },
+            { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: (value) => { config.primary_action_color = value; window.elementSdk.setConfig({ primary_action_color: value }); } },
+            { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: (value) => { config.secondary_action_color = value; window.elementSdk.setConfig({ secondary_action_color: value }); } }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["course_title", config.course_title || defaultConfig.course_title],
+          ["subtitle", config.subtitle || defaultConfig.subtitle]
+        ])
+      });
+    }
+
+    initApp();
+  </script>
+ </body>
+</html>
